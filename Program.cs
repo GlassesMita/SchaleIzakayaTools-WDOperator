@@ -35,10 +35,24 @@ namespace Schale_Izakaya_WD_Operator
 
             Console.WriteLine($"欢迎使用 {AppTitle}");
             Console.WriteLine(new string('=', 60));
-            Console.WriteLine($"应用程序目录: {AppDirectory}");
 
             LoadCachedPath();
-            cachedGamePath ??= FindTouhouMystiaIzakaya();
+            
+            if (string.IsNullOrEmpty(cachedGamePath))
+            {
+                Console.WriteLine("\n正在查找游戏目录...");
+                cachedGamePath = FindTouhouMystiaIzakaya();
+            }
+
+            if (!string.IsNullOrEmpty(cachedGamePath))
+            {
+                Console.WriteLine($"已找到游戏目录: {cachedGamePath}");
+            }
+            else
+            {
+                Console.WriteLine("\n未找到游戏目录，将使用应用程序目录作为排除目标");
+                cachedGamePath = AppDirectory;
+            }
 
             MainMenu();
         }
@@ -439,12 +453,7 @@ namespace Schale_Izakaya_WD_Operator
 
             if (string.IsNullOrEmpty(cachedGamePath))
             {
-                cachedGamePath = FindTouhouMystiaIzakaya();
-            }
-
-            if (string.IsNullOrEmpty(cachedGamePath))
-            {
-                ShowError("无法找到游戏路径！请先手动设置游戏路径（选项7）。");
+                ShowError("未设置游戏路径！请先手动设置游戏路径（选项7）。");
                 return;
             }
 
