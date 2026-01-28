@@ -27,6 +27,8 @@ namespace Schale_Izakaya_WD_Operator
             Console.OutputEncoding = Encoding.UTF8;
             Console.InputEncoding = Encoding.UTF8;
 
+            Console.WriteLine("\tFACE THE SIN, SAVE THE E.G.O\t");
+
             if (!IsRunningAsAdmin())
             {
                 ShowError("请以管理员权限运行此应用程序！\n此应用程序需要管理员权限才能操作 Windows Defender。");
@@ -137,6 +139,36 @@ namespace Schale_Izakaya_WD_Operator
         {
             Console.WriteLine("\n正在查找 Touhou Mystia Izakaya 游戏目录...");
 
+            string[] steamPaths = GetSteamGamePaths();
+            foreach (string searchPath in steamPaths)
+            {
+                if (Directory.Exists(searchPath) && IsValidGamePath(searchPath))
+                {
+                    Console.WriteLine($"找到游戏目录: {searchPath}");
+                    return searchPath;
+                }
+            }
+
+            string parentDir = Directory.GetParent(AppDirectory)?.FullName;
+            if (!string.IsNullOrEmpty(parentDir) && Directory.Exists(parentDir))
+            {
+                string[] directories = Directory.GetDirectories(parentDir);
+                foreach (string dir in directories)
+                {
+                    string dirName = Path.GetFileName(dir);
+                    if (dirName.Contains("Mystia") || dirName.Contains("Izakaya") ||
+                        dirName.Contains("夜雀") || dirName.Contains("食堂") ||
+                        dirName.Contains("Touhou"))
+                    {
+                        if (IsValidGamePath(dir))
+                        {
+                            Console.WriteLine($"找到游戏目录: {dir}");
+                            return dir;
+                        }
+                    }
+                }
+            }
+
             string[] possibleGameDirs = {
                 "Touhou Mystia's Izakaya",
                 "Touhou Mystia Izakaya",
@@ -148,55 +180,32 @@ namespace Schale_Izakaya_WD_Operator
             foreach (string dirName in possibleGameDirs)
             {
                 string fullPath = Path.Combine(AppDirectory, dirName);
-                if (Directory.Exists(fullPath))
+                if (Directory.Exists(fullPath) && IsValidGamePath(fullPath))
                 {
                     Console.WriteLine($"找到游戏目录: {fullPath}");
                     return fullPath;
                 }
-
-                string parentPath = Path.GetDirectoryName(fullPath);
-                if (!string.IsNullOrEmpty(parentPath) && Directory.Exists(parentPath))
-                {
-                    Console.WriteLine($"找到游戏目录: {parentPath}");
-                    return parentPath;
-                }
             }
-
-            string parentDir = Directory.GetParent(AppDirectory)?.FullName;
-            if (!string.IsNullOrEmpty(parentDir))
-            {
-                if (Directory.Exists(parentDir))
-                {
-                    string[] directories = Directory.GetDirectories(parentDir);
-                    foreach (string dir in directories)
-                    {
-                        string dirName = Path.GetFileName(dir);
-                        if (dirName.Contains("Mystia") || dirName.Contains("Izakaya") ||
-                            dirName.Contains("夜雀") || dirName.Contains("食堂") ||
-                            dirName.Contains("Touhou"))
-                        {
-                            Console.WriteLine($"找到游戏目录: {dir}");
-                            return dir;
-                        }
-                    }
-                }
-            }
-
-            string[] searchPaths = GetSteamGamePaths();
-
-            foreach (string searchPath in searchPaths)
-            {
-                if (Directory.Exists(searchPath))
-                {
-                    Console.WriteLine($"找到游戏目录: {searchPath}");
-                    return searchPath;
-                }
-            }
-
-            Console.WriteLine("未找到 Touhou Mystia Izakaya 游戏目录！");
-            Console.WriteLine("请手动设置游戏路径（选项 7）。");
 
             return null;
+        }
+
+        static bool IsValidGamePath(string path)
+        {
+            if (!Directory.Exists(path)) return false;
+
+            string[] exeFiles = Directory.GetFiles(path, "Touhou Mystia Izakaya.exe");
+            if (exeFiles.Length == 0) return false;
+
+            string exePath = exeFiles[0];
+            string exeName = Path.GetFileNameWithoutExtension(exePath);
+            string unityPlayerPath = Path.Combine(path, "UnityPlayer.dll");
+            string dataPath = Path.Combine(path, exeName + "_Data");
+
+            bool hasUnityPlayer = File.Exists(unityPlayerPath);
+            bool hasDataDir = Directory.Exists(dataPath);
+
+            return hasUnityPlayer && hasDataDir;
         }
 
         static string[] GetSteamGamePaths()
