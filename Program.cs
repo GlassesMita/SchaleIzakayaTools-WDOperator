@@ -27,7 +27,7 @@ namespace Schale_Izakaya_WD_Operator
             Console.OutputEncoding = Encoding.UTF8;
             Console.InputEncoding = Encoding.UTF8;
 
-            Console.WriteLine("\tFACE THE SIN, SAVE THE E.G.O\t");
+            Console.WriteLine("\tFACE THE SIN, SAVE THE E.G.O\n");
 
             if (!IsRunningAsAdmin())
             {

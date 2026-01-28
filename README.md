@@ -4,20 +4,21 @@
 ![Platform](https://img.shields.io/badge/Platform-Windows%20x64-green?style=flat-square)
 ![License](https://img.shields.io/badge/license-GNU%20GPL%20v3-red.svg?style=flat-square)
 
-一个专为《东方夜雀食堂》（Touhou Mystia's Izakaya）玩家设计的 Windows Defender 管理工具，帮助您快速配置游戏目录的排除规则，确保游戏运行运行时不会因为 Mod 而被 Windows Defender 阻塞<del><i>而导致用户骂娘</i></del>。
+一个专为《东方夜雀食堂》（Touhou Mystia's Izakaya）玩家设计的 Windows Defender 管理工具，帮助您快速配置游戏目录的排除规则，确保游戏运行时不会因为 Mod 或游戏文件被 Windows Defender 误杀。
 
 ## 功能特点
 
 ### 核心功能
 - **一键禁用 Windows Defender**：快速关闭实时保护、行为监控和脚本扫描
 - **一键启用 Windows Defender**：随时恢复安全设置
-- **自动添加排除项**：扫描游戏目录，自动添加所有相关文件夹和文件到排除列表
+- **自动添加排除项**：扫描游戏目录，自动添加相关路径到排除列表
 - **智能路径识别**：自动检测游戏安装路径，支持多种安装位置
 - **路径缓存保存**：首次设置后自动保存游戏路径，下次启动无需重新设置
 - **删除排除项**：可视化界面选择要删除的排除项
 
 ### 设计理念
 - **安全优先**：需要管理员权限才能运行，确保成功操作 Windows Defender
+- **自动查找**：启动时自动扫描游戏目录，无需手动配置
 
 ## 系统要求
 
@@ -54,15 +55,15 @@ dotnet publish -c Release -o publish
 
 **重要**：程序需要管理员权限才能操作 Windows Defender。
 
-1. 右键点击程序，选择 **"以管理员身份运行"**
-2. 或者双击运行后，UAC 提示时选择 **"是"**
+1. 双击运行程序
+2. UAC 提示时选择 **"是"** 以管理员身份运行
 
 ### 主菜单说明
 
 ```
 欢迎使用 沙勒食堂工具：Windows Defender 操作工具
 ============================================================
-应用程序目录: $(AppDirectory)
+应用程序目录: C:\Program Files\SchaleIzakayaTools-WDOperator
 
 主菜单 - 请选择操作:
 [1] 禁用 Windows Defender
@@ -113,22 +114,32 @@ dotnet publish -c Release -o publish
 #### [7] 手动设置游戏路径
 手动输入游戏目录路径并保存。
 
-### 游戏目录结构
+## 游戏目录识别
 
-程序支持以下游戏安装位置：
+### 自动查找顺序
 
-```
-自动查找顺序：
-1. 程序所在目录下的游戏文件夹
-2. 程序父目录下的游戏文件夹
-3. 常见安装路径（D:\Games, E:\Games 等）
+程序启动时会自动按以下顺序查找游戏目录：
 
-支持的文件夹名称：
+1. **Steam 注册表路径**：读取 Steam 安装位置，查找 `steamapps\common` 目录
+2. **常见 Steam 路径**：扫描各磁盘根目录下的 `SteamLibrary\steamapps\common`
+3. **程序父目录**：搜索运行目录的上一级目录
+4. **程序目录**：搜索程序自身所在目录
+
+### 验证条件
+
+程序通过以下条件验证找到的目录是否为游戏目录：
+- 目录中存在 `.exe` 可执行文件
+- 目录中存在 `UnityPlayer.dll` 文件
+- 目录中存在 `<可执行文件名>_Data` 目录
+
+### 支持的文件夹名称
+
+程序支持多种游戏文件夹命名方式：
 - Touhou Mystia's Izakaya
 - Touhou Mystia Izakaya
 - 东方夜雀食堂
-- Mystias Izakaya
-```
+- Mystia's Izakaya
+- 其他包含游戏文件的目录
 
 ## 编译说明
 
@@ -163,7 +174,8 @@ publish/
 ├── 沙勒食堂工具：Windows Defender 操作工具.dll     # 运行时库
 ├── 沙勒食堂工具：Windows Defender 操作工具.pdb     # 调试信息
 ├── 沙勒食堂工具：Windows Defender 操作工具.deps.json
-└── 沙勒食堂工具：Windows Defender 操作工具.runtimeconfig.json
+├── 沙勒食堂工具：Windows Defender 操作工具.runtimeconfig.json
+└── config.ini                                        # 配置文件（运行时生成）
 ```
 
 **注意**：需要保持所有文件在同一目录才能正常运行。
@@ -171,35 +183,36 @@ publish/
 ## 常见问题
 
 ### Q: 程序无法启动？
-**A**: 请确保以管理员权限运行程序。右键点击程序选择"以管理员身份运行"。
+**A**: 请确保以管理员权限运行程序。双击程序后，UAC 提示时选择"是"。
 
 ### Q: 添加排除项失败？
-**A**: 
+**A**:
 1. 检查是否以管理员权限运行
 2. 确保游戏路径正确且存在
 3. 检查 PowerShell 是否正常工作
 
 ### Q: 游戏路径识别不到？
-**A**: 
+**A**:
 1. 尝试手动设置游戏路径（选项 7）
 2. 确保游戏文件夹名称符合支持的标准命名
 3. 检查目录权限
+4. 确保目录包含游戏必需文件（UnityPlayer.dll 和 *_Data 目录）
 
 ### Q: 如何完全卸载？
-**A**: 
+**A**:
 1. 删除程序文件
 2. 如果需要，删除 Windows Defender 中的排除项（使用选项 5）
+3. 删除配置文件 config.ini
 
 ### Q: 支持其他游戏吗？
 **A**: 当前版本专为《东方夜雀食堂》优化，但手动添加排除项功能可用于任何游戏或程序。
 
 ### Q: 安全性如何？
-**A**: 
+**A**:
 - 程序不收集任何用户数据
 - 所有操作都需要管理员权限确认
 - 配置文件仅存储游戏路径
 
-
 ## 许可证
 
-本项目采用 GNU Public License 3.0 协议。
+本项目采用 GNU General Public License v3.0 协议。
