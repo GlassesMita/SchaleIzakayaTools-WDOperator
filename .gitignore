@@ -1,0 +1,40 @@
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+bld/
+[Bb]in/
+[Oo]bj/
+.idea/
+
+# .NET Core
+.pdb
+*.user
+*.userosscache
+*.suo
+
+# NuGet Packages
+*.nupkg
+packages/
+project.lock.json
+
+# Build files
+*.dll
+*.exe
+*.exe.config
+*.dep.json
+*.runtimeconfig.json
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vs/
+.vscode/
+*.swp
+*.swo
+
+# Release publish
+publish/
