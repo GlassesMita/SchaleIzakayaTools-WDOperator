@@ -168,14 +168,7 @@ namespace Schale_Izakaya_WD_Operator
                 }
             }
 
-            string[] searchPaths = {
-                @"D:\Games\Touhou Mystia's Izakaya",
-                @"D:\Games\Touhou Mystia Izakaya",
-                @"D:\Games\东方夜雀食堂",
-                @"E:\Games\Touhou Mystia's Izakaya",
-                @"E:\Games\Touhou Mystia Izakaya",
-                @"C:\Games\Touhou Mystia's Izakaya"
-            };
+            string[] searchPaths = GetSteamGamePaths();
 
             foreach (string searchPath in searchPaths)
             {
@@ -186,8 +179,126 @@ namespace Schale_Izakaya_WD_Operator
                 }
             }
 
-            Console.WriteLine("未在应用程序目录中找到 Touhou Mystia Izakaya 游戏目录！");
-            Console.WriteLine("将使用手动输入模式。");
+            Console.WriteLine("未找到 Touhou Mystia Izakaya 游戏目录！");
+            Console.WriteLine("请手动设置游戏路径（选项 7）。");
+
+            return null;
+        }
+
+        static string[] GetSteamGamePaths()
+        {
+            List<string> paths = new List<string>();
+
+            string steamPath = GetSteamInstallPath();
+            if (!string.IsNullOrEmpty(steamPath))
+            {
+                string steamCommonPath = Path.Combine(steamPath, "steamapps", "common");
+                if (Directory.Exists(steamCommonPath))
+                {
+                    string[] directories = Directory.GetDirectories(steamCommonPath);
+                    foreach (string dir in directories)
+                    {
+                        string dirName = Path.GetFileName(dir);
+                        if (dirName.Contains("Mystia") || dirName.Contains("Izakaya") ||
+                            dirName.Contains("夜雀") || dirName.Contains("食堂") ||
+                            dirName.Contains("Touhou"))
+                        {
+                            paths.Add(dir);
+                        }
+                    }
+                }
+            }
+
+            foreach (DriveInfo drive in DriveInfo.GetDrives())
+            {
+                if (drive.DriveType == DriveType.Fixed || drive.DriveType == DriveType.Removable)
+                {
+                    try
+                    {
+                        string steamLibraryPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common");
+                        if (Directory.Exists(steamLibraryPath))
+                        {
+                            string[] directories = Directory.GetDirectories(steamLibraryPath);
+                            foreach (string dir in directories)
+                            {
+                                string dirName = Path.GetFileName(dir);
+                                if ((dirName.Contains("Mystia") || dirName.Contains("Izakaya") ||
+                                     dirName.Contains("夜雀") || dirName.Contains("食堂") ||
+                                     dirName.Contains("Touhou")) && !paths.Contains(dir))
+                                {
+                                    paths.Add(dir);
+                                }
+                            }
+                        }
+                    }
+                    catch
+                    {
+                    }
+
+                    string gamesPath = Path.Combine(drive.Name, "Games");
+                    if (Directory.Exists(gamesPath))
+                    {
+                        string[] gameDirs = Directory.GetDirectories(gamesPath);
+                        foreach (string dir in gameDirs)
+                        {
+                            string dirName = Path.GetFileName(dir);
+                            if ((dirName.Contains("Mystia") || dirName.Contains("Izakaya") ||
+                                 dirName.Contains("夜雀") || dirName.Contains("食堂") ||
+                                 dirName.Contains("Touhou")) && !paths.Contains(dir))
+                            {
+                                paths.Add(dir);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return paths.ToArray();
+        }
+
+        static string? GetSteamInstallPath()
+        {
+            try
+            {
+                using (Microsoft.Win32.RegistryKey? key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Valve\Steam"))
+                {
+                    if (key != null)
+                    {
+                        object? installPath = key.GetValue("InstallPath");
+                        if (installPath != null)
+                        {
+                            return installPath.ToString();
+                        }
+                    }
+                }
+
+                using (Microsoft.Win32.RegistryKey? key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\Valve\Steam"))
+                {
+                    if (key != null)
+                    {
+                        object? installPath = key.GetValue("InstallPath");
+                        if (installPath != null)
+                        {
+                            return installPath.ToString();
+                        }
+                    }
+                }
+
+                using (Microsoft.Win32.RegistryKey? key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Valve\Steam"))
+                {
+                    if (key != null)
+                    {
+                        object? installPath = key.GetValue("InstallPath");
+                        if (installPath != null)
+                        {
+                            return installPath.ToString();
+                        }
+                    }
+                }
+            }
+            catch
+            {
+            }
 
             return null;
         }
