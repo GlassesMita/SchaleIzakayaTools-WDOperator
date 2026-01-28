@@ -1,0 +1,5 @@
+D:\Schale Izakaya WD Operator\publish\沙勒食堂工具：Windows Defender 操作工具.exe
+D:\Schale Izakaya WD Operator\publish\沙勒食堂工具：Windows Defender 操作工具.dll
+D:\Schale Izakaya WD Operator\publish\沙勒食堂工具：Windows Defender 操作工具.deps.json
+D:\Schale Izakaya WD Operator\publish\沙勒食堂工具：Windows Defender 操作工具.runtimeconfig.json
+D:\Schale Izakaya WD Operator\publish\沙勒食堂工具：Windows Defender 操作工具.pdb
